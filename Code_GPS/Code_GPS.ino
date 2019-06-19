@@ -8,7 +8,7 @@
 #define BLYNK_PRINT Serial
 #define RST_PIN    D3    
 #define SS_PIN     D8   
-#define LED        D1
+#define LED        D0
 
 static const int RXPin = 4, TXPin = 5;   // GPIO 5=D2(conneect Tx of GPS) and GPIO 4=D1(Connect Rx of GPS
 static const uint32_t GPSBaud = 9600; //if Baud rate 9600 didn't work in your case then use 4800
@@ -25,8 +25,8 @@ float sats;      //Variable to store no. of satellites response
 String bearing;  //Variable to store orientation or direction of GPS
 
 char auth[] = "06df74b329f74a39bc8a6d06d25a1f87";              //Your Project authentication key
-char ssid[] = "*******";                                       // Name of your network (HotSpot or Router name)
-char pass[] = "*******";                                      // Corresponding Password
+char ssid[] = "IOTNet";                                       // Name of your network (HotSpot or Router name)
+char pass[] = "redeiot19";                                      // Corresponding Password
 
 
 
@@ -37,7 +37,7 @@ unsigned int move_index = 1;       // fixed location for now
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println();
   ss.begin(GPSBaud);
   Blynk.begin(auth, ssid, pass);
@@ -86,9 +86,9 @@ void loop()
   //imprime os detalhes tecnicos do cartão/tag
   mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid));
 
-  if ((conteudo.substring(1) == "01 D1 FC 52")||(conteudo.substring(1) == "D5 3C B1 79")) //UID 1 - Cartao
+  if ((conteudo.substring(1) == "30 3C 3C A6")||(conteudo.substring(1) == "69 76 0A A9")) //UID 1 - Cartao
   {
-    Serial.println("Acesso liberado !");
+    Serial.println("Acesso liberado, aguarde o carro ligar!");
     Serial.println();
     digitalWrite(D1, HIGH);     // LIGA LED OU/ ativa rele, abre trava solenoide
     delay(3000);              // DELAY /espera 3 segundos
@@ -96,8 +96,8 @@ void loop()
   }
   else
   {
-    Serial.println("Acesso negado !");
-    delay(2000);  
+    Serial.println("Motorista não cadastrado!");
+    return;  
   }  
     while (ss.available() > 0) 
     {
@@ -107,6 +107,11 @@ void loop()
   }
   Blynk.run();
   timer.run();
+  while(true){
+    Blynk.run();
+    timer.run();
+    delay(10000);
+  }
 }
 
 void displayInfo()
